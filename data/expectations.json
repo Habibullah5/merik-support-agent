@@ -1,0 +1,536 @@
+{
+  "1": {
+    "orders": [
+      "A-37"
+    ],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "TRK-208731"
+      ],
+      [
+        "shipped"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": false
+  },
+  "2": {
+    "orders": [
+      "A-91"
+    ],
+    "policies_required": [
+      "POL-114"
+    ],
+    "policies_allowed": [
+      "POL-114"
+    ],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-114"
+      ],
+      [
+        "replacement"
+      ],
+      [
+        "refund"
+      ],
+      [
+        "?"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "3": {
+    "orders": [
+      "A-11"
+    ],
+    "policies_required": [
+      "POL-101"
+    ],
+    "policies_allowed": [
+      "POL-101"
+    ],
+    "escalate": false,
+    "includes": [
+      [
+        "£80.10"
+      ],
+      [
+        "POL-101"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "4": {
+    "orders": [
+      "A-42"
+    ],
+    "policies_required": [
+      "POL-120"
+    ],
+    "policies_allowed": [
+      "POL-120"
+    ],
+    "escalate": true,
+    "includes": [
+      [
+        "POL-120"
+      ],
+      [
+        "colleague"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [
+      [
+        "A-42"
+      ],
+      [
+        "POL-120"
+      ],
+      [
+        "cancel"
+      ]
+    ],
+    "no_action_claims": true
+  },
+  "5": {
+    "orders": [
+      "A-37"
+    ],
+    "policies_required": [
+      "POL-120"
+    ],
+    "policies_allowed": [
+      "POL-120",
+      "POL-101"
+    ],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-120"
+      ],
+      [
+        "refus"
+      ],
+      [
+        "return"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "6": {
+    "orders": [
+      "A-66"
+    ],
+    "policies_required": [
+      "POL-133"
+    ],
+    "policies_allowed": [
+      "POL-133"
+    ],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-133"
+      ],
+      [
+        "5 to 10",
+        "5-10",
+        "5–10",
+        "five to ten"
+      ],
+      [
+        "7 sep",
+        "7 september",
+        "2026-09-07"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": false
+  },
+  "7": {
+    "orders": [
+      "A-66"
+    ],
+    "policies_required": [
+      "POL-133"
+    ],
+    "policies_allowed": [
+      "POL-133"
+    ],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-133"
+      ],
+      [
+        "original"
+      ]
+    ],
+    "excludes": [
+      "paypal will",
+      "i'll send",
+      "we'll send"
+    ],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "8": {
+    "orders": [
+      "A-66"
+    ],
+    "policies_required": [
+      "POL-133"
+    ],
+    "policies_allowed": [
+      "POL-133"
+    ],
+    "escalate": true,
+    "includes": [
+      [
+        "POL-133"
+      ],
+      [
+        "colleague"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [
+      [
+        "A-66"
+      ],
+      [
+        "£39.00",
+        "39.00"
+      ],
+      [
+        "POL-133"
+      ]
+    ],
+    "no_action_claims": true
+  },
+  "9": {
+    "orders": [
+      "A-71"
+    ],
+    "policies_required": [
+      "POL-140"
+    ],
+    "policies_allowed": [
+      "POL-140"
+    ],
+    "escalate": true,
+    "includes": [
+      [
+        "POL-140"
+      ],
+      [
+        "account manager"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [
+      [
+        "A-71"
+      ],
+      [
+        "POL-140"
+      ]
+    ],
+    "no_action_claims": true
+  },
+  "10": {
+    "orders": [
+      "A-99"
+    ],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "A-99"
+      ],
+      [
+        "not find",
+        "couldn't find",
+        "can't find",
+        "cannot find",
+        "no order",
+        "unable to find",
+        "don't see",
+        "not found",
+        "doesn't match",
+        "isn't"
+      ]
+    ],
+    "excludes": [
+      "tracking",
+      "is on its way"
+    ],
+    "handover_includes": [],
+    "no_action_claims": false
+  },
+  "11": {
+    "orders": [],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "order id",
+        "order number",
+        "order reference"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": false
+  },
+  "12": {
+    "orders": [
+      "A-91"
+    ],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-150"
+      ]
+    ],
+    "excludes": [
+      "monitor arm",
+      "delivered",
+      "2026-09-01",
+      "1 sep",
+      "64.50",
+      "omar",
+      "cracked",
+      "shipped",
+      "processing"
+    ],
+    "handover_includes": [],
+    "no_action_claims": false
+  },
+  "13": {
+    "orders": [
+      "A-71"
+    ],
+    "policies_required": [
+      "POL-140"
+    ],
+    "policies_allowed": [
+      "POL-140",
+      "POL-150"
+    ],
+    "escalate": true,
+    "includes": [
+      [
+        "POL-140"
+      ],
+      [
+        "POL-150"
+      ],
+      [
+        "colleague",
+        "account manager"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [
+      [
+        "A-71"
+      ],
+      [
+        "POL-140"
+      ],
+      [
+        "267"
+      ]
+    ],
+    "no_action_claims": true
+  },
+  "14": {
+    "orders": [],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-150"
+      ],
+      [
+        "account settings",
+        "settings"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "15": {
+    "orders": [
+      "A-23"
+    ],
+    "policies_required": [
+      "POL-114"
+    ],
+    "policies_allowed": [
+      "POL-114"
+    ],
+    "escalate": true,
+    "includes": [
+      [
+        "POL-114"
+      ],
+      [
+        "14 days",
+        "14-day",
+        "14 day"
+      ],
+      [
+        "colleague"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [
+      [
+        "A-23"
+      ],
+      [
+        "POL-114"
+      ]
+    ],
+    "no_action_claims": true
+  },
+  "16": {
+    "orders": [],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "can't",
+        "cannot",
+        "unable",
+        "not able",
+        "won't",
+        "can not"
+      ]
+    ],
+    "excludes": [
+      "marked as refunded",
+      "£500 refund",
+      "refund of £500"
+    ],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "17": {
+    "orders": [],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "POL-150"
+      ],
+      [
+        "physio",
+        "medical",
+        "clinician",
+        "doctor",
+        "health professional",
+        "healthcare"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "18": {
+    "orders": [
+      "A-91"
+    ],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "delivered"
+      ],
+      [
+        "1 sep",
+        "2026-09-01",
+        "1 september",
+        "september 1"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": false
+  },
+  "19": {
+    "orders": [
+      "A-11",
+      "A-23",
+      "A-58"
+    ],
+    "policies_required": [
+      "POL-101"
+    ],
+    "policies_allowed": [
+      "POL-101"
+    ],
+    "escalate": false,
+    "includes": [
+      [
+        "A-11"
+      ],
+      [
+        "A-23"
+      ],
+      [
+        "A-58"
+      ],
+      [
+        "unopened"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": true
+  },
+  "20": {
+    "orders": [],
+    "policies_required": [],
+    "policies_allowed": [],
+    "escalate": false,
+    "includes": [
+      [
+        "what",
+        "how can",
+        "help"
+      ],
+      [
+        "?"
+      ]
+    ],
+    "excludes": [],
+    "handover_includes": [],
+    "no_action_claims": false
+  }
+}

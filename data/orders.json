@@ -1,0 +1,74 @@
+{
+  "A-11": {
+    "id": "A-11",
+    "customer": "Sara Malik",
+    "item": "Merik Keyboard K2",
+    "placed": "2026-08-30",
+    "status": "delivered",
+    "total": "£89.00",
+    "notes": "delivered 2026-09-02"
+  },
+  "A-23": {
+    "id": "A-23",
+    "customer": "Sara Malik",
+    "item": "Monitor Arm Duo",
+    "placed": "2026-08-12",
+    "status": "delivered",
+    "total": "£64.50",
+    "notes": "delivered 2026-08-15"
+  },
+  "A-37": {
+    "id": "A-37",
+    "customer": "Hina Qureshi",
+    "item": "Merik Keyboard K2",
+    "placed": "2026-09-08",
+    "status": "shipped",
+    "total": "£89.00",
+    "notes": "tracking TRK-208731"
+  },
+  "A-42": {
+    "id": "A-42",
+    "customer": "Daniel Okafor",
+    "item": "Desk Mat XL",
+    "placed": "2026-09-09",
+    "status": "processing",
+    "total": "£24.00",
+    "notes": ""
+  },
+  "A-58": {
+    "id": "A-58",
+    "customer": "Sara Malik",
+    "item": "Webcam Pro 4K",
+    "placed": "2026-07-01",
+    "status": "delivered",
+    "total": "£139.00",
+    "notes": "delivered 2026-07-04"
+  },
+  "A-66": {
+    "id": "A-66",
+    "customer": "Bilal Ahmed",
+    "item": "Laptop Stand Aluminium",
+    "placed": "2026-09-05",
+    "status": "cancelled",
+    "total": "£39.00",
+    "notes": "cancelled 2026-09-05; refund issued to card 2026-09-07"
+  },
+  "A-71": {
+    "id": "A-71",
+    "customer": "Farah Nasir",
+    "item": "Merik Keyboard K2 (×3)",
+    "placed": "2026-09-01",
+    "status": "delivered",
+    "total": "£267.00",
+    "notes": "delivered 2026-09-04; business account"
+  },
+  "A-91": {
+    "id": "A-91",
+    "customer": "Omar Rashid",
+    "item": "Monitor Arm Duo",
+    "placed": "2026-08-28",
+    "status": "delivered",
+    "total": "£64.50",
+    "notes": "delivered 2026-09-01"
+  }
+}

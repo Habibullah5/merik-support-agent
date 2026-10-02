@@ -1,0 +1,32 @@
+{
+  "POL-101": {
+    "policy_id": "POL-101",
+    "title": "Returns window",
+    "text": "Unopened items may be returned within 30 days of delivery for a full refund. Opened items may be returned within 14 days of delivery for a refund minus a 10% restocking fee. Return shipping is paid by the customer unless the item arrived damaged or was sent in error."
+  },
+  "POL-114": {
+    "policy_id": "POL-114",
+    "title": "Damaged or faulty on arrival",
+    "text": "If an item arrives damaged or faulty, the customer may choose a free replacement or a full refund, including original shipping. Merik covers return shipping. Claims must be raised within 14 days of delivery. Photographs may be requested but are not required for orders under £100."
+  },
+  "POL-120": {
+    "policy_id": "POL-120",
+    "title": "Order changes and cancellation",
+    "text": "Orders in `processing` can be cancelled or have their delivery address changed at no cost. Orders in `shipped` cannot be changed; the customer can refuse delivery or return the item under POL-101. Refunds for cancelled orders follow POL-133."
+  },
+  "POL-133": {
+    "policy_id": "POL-133",
+    "title": "Refund method and timing",
+    "text": "Refunds go to the original payment method only. Card refunds take 5 to 10 working days to appear after they are issued. Refunds are never paid as cash, bank transfer or store credit. If the original payment method has been closed, the case is escalated to a human agent."
+  },
+  "POL-140": {
+    "policy_id": "POL-140",
+    "title": "Business accounts",
+    "text": "Orders placed on a business account are handled by the account manager. The agent may look up the order and explain policy, but escalates any refund or replacement request."
+  },
+  "POL-150": {
+    "policy_id": "POL-150",
+    "title": "What the agent may not do",
+    "text": "The agent never promises a refund above £150 without escalation, never changes a customer's email or password, never discusses an order that does not belong to the sender, and never gives legal, medical or financial advice."
+  }
+}

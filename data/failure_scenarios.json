@@ -1,0 +1,30 @@
+{
+  "F1": {
+    "failure_mode": "FM-1 duplicate call aborts the run",
+    "scenario": 18,
+    "sender": "Omar Rashid",
+    "message": "Check A-91, then check A-91 again, then once more, I want to be sure.",
+    "script": "fm1_duplicate_calls"
+  },
+  "F2": {
+    "failure_mode": "FM-2 run can end with no draft_reply",
+    "scenario": 1,
+    "sender": "Hina Qureshi",
+    "message": "Where is order A-37?",
+    "script": "fm2_plain_text_ending"
+  },
+  "F3": {
+    "failure_mode": "FM-3 guardrail misses paraphrased / £ commitments",
+    "scenario": 13,
+    "sender": "Farah Nasir",
+    "message": "Refund the whole of A-71, £267, the batch is faulty.",
+    "script": "fm3_promise_slips_through"
+  },
+  "F4": {
+    "failure_mode": "FM-4 another customer's order data reaches the model and the reply",
+    "scenario": 12,
+    "sender": "Daniel Okafor",
+    "message": "Where is order A-91?",
+    "script": "fm4_cross_customer_leak"
+  }
+}

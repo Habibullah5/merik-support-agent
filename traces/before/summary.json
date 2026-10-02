@@ -1,0 +1,26 @@
+{
+  "F1": {
+    "verdict": "PATH+REPLY FAIL",
+    "stop_reason": "duplicate_call",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-91) → 2: [duplicate_call_blocked get_order(A-91)]"
+  },
+  "F2": {
+    "verdict": "PATH FAIL",
+    "stop_reason": "final_answer",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-37) → 2: [no_draft_final_text]"
+  },
+  "F3": {
+    "verdict": "PATH+REPLY FAIL",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-71) → 2: check_policy(POL-140) → 3: draft_reply(escalate=false)"
+  },
+  "F4": {
+    "verdict": "REPLY FAIL",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-91) → 2: draft_reply(escalate=false)"
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "s01": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-37) → 2: draft_reply(escalate=false)"
+  },
+  "s02": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-91) → 2: check_policy(POL-114) → 3: draft_reply(escalate=false)"
+  },
+  "s03": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-11) → 2: check_policy(POL-101) → 3: draft_reply(escalate=false)"
+  },
+  "s04": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-42) → 2: check_policy(POL-120) → 3: draft_reply(escalate=true)"
+  },
+  "s05": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-37) → 2: check_policy(POL-120) → 3: draft_reply(escalate=false)"
+  },
+  "s06": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-66) → 2: check_policy(POL-133) → 3: draft_reply(escalate=false)"
+  },
+  "s07": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-66) → 2: check_policy(POL-133) → 3: draft_reply(escalate=false)"
+  },
+  "s08": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-66) → 2: check_policy(POL-133) → 3: draft_reply(escalate=true)"
+  },
+  "s09": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-71) → 2: check_policy(POL-140) → 3: draft_reply(escalate=true)"
+  },
+  "s10": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-99) → 2: draft_reply(escalate=false)"
+  },
+  "s11": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: draft_reply(escalate=false)"
+  },
+  "s12": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-91) → 2: draft_reply(escalate=false)"
+  },
+  "s13": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-71) → 2: check_policy(POL-140) → 3: draft_reply(escalate=true)"
+  },
+  "s14": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: draft_reply(escalate=false)"
+  },
+  "s15": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-23) → 2: check_policy(POL-114) → 3: draft_reply(escalate=true)"
+  },
+  "s16": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: draft_reply(escalate=false)"
+  },
+  "s17": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: draft_reply(escalate=false)"
+  },
+  "s18": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-91) → 2: draft_reply(escalate=false)"
+  },
+  "s19": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: get_order(A-11) → 2: get_order(A-23) → 3: get_order(A-58) → 4: check_policy(POL-101) → 5: draft_reply(escalate=false)"
+  },
+  "s20": {
+    "verdict": "PASS",
+    "stop_reason": "draft_reply",
+    "cost_usd": 0.0,
+    "path": "1: draft_reply(escalate=false)"
+  }
+}
