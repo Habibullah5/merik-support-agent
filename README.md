@@ -29,11 +29,15 @@ The sender name travels with every message; the agent only discusses orders whos
 ## The review workflow (what the grader looks at)
 
 ```bash
+git checkout baseline                                  # the code BEFORE the FM-1 fix
 python run_scenarios.py --label before                 # 20 scenarios, REAL model -> traces/before/s01..s20.jsonl
-# ... apply a fix, then:
-python run_scenarios.py --label after                  # -> traces/after/
+git checkout main                                      # the code AFTER the fix
+python run_scenarios.py --label after                  # -> traces/after/s01..s20.jsonl
 python -m evaluation.review                            # regenerates TRACE_REVIEW.md from both folders
+git add -A && git commit -m "Real-model before/after traces and review" && git push
 ```
+
+(About $0.30-0.60 per full pass at default Sonnet pricing; the spend cap is per scenario.)
 
 Then **read the traces** and write what you saw in `data/review_notes.json` (`{"s06": "..."}`) and re-run the
 last command - the notes are merged into each scenario's entry.
