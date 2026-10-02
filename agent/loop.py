@@ -42,6 +42,7 @@ def run_agent(
     max_steps = int(os.environ.get("MAX_STEPS", 8)) if max_steps is None else max_steps
     max_spend_usd = float(os.environ.get("MAX_SPEND_USD", 0.50)) if max_spend_usd is None else max_spend_usd
     model = model or os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+    max_suppressed = int(os.environ.get("MAX_SUPPRESSED_DUPLICATES", 3))
 
     if client is None:
         import anthropic  # imported lazily so offline tests need no SDK
@@ -59,118 +60,134 @@ def run_agent(
 
     messages = [{"role": "user", "content": format_user_message(sender, message)}]
     seen_calls = set()
+    call_cache = {}  # key -> what the model was shown the first time (FM-1 fix)
+    suppressed = 0
     cumulative_cost = 0.0
     draft = None
     final_text = None
     stop_reason = "unknown"
 
-    try:
-        for _turn in range(max_steps):
-            with Timer() as t:
-                response = client.messages.create(
-                    model=model, max_tokens=1024, system=SYSTEM_PROMPT,
-                    tools=TOOLS_SCHEMA, messages=messages,
-                )
-            usage = response.usage
-            turn_cost = estimate_cost_usd(usage.input_tokens, usage.output_tokens)
-            cumulative_cost += turn_cost
-            # cost/time of this model turn is attributed to the first record the turn produces
-            pending = {"ms": t.elapsed_ms, "cost": turn_cost}
+    for _turn in range(max_steps):
+        with Timer() as t:
+            response = client.messages.create(
+                model=model, max_tokens=1024, system=SYSTEM_PROMPT,
+                tools=TOOLS_SCHEMA, messages=messages,
+            )
+        usage = response.usage
+        turn_cost = estimate_cost_usd(usage.input_tokens, usage.output_tokens)
+        cumulative_cost += turn_cost
+        # cost/time of this model turn is attributed to the first record the turn produces
+        pending = {"ms": t.elapsed_ms, "cost": turn_cost}
 
-            def attrib():
-                out = dict(duration_ms=pending["ms"], cost_usd=pending["cost"])
-                pending["ms"] = pending["cost"] = 0.0
-                return out
+        def attrib():
+            out = dict(duration_ms=pending["ms"], cost_usd=pending["cost"])
+            pending["ms"] = pending["cost"] = 0.0
+            return out
 
-            if cumulative_cost > max_spend_usd:
-                stop_reason = "spend_cap"
-                logger.log("stop_spend_cap", cumulative_cost_usd=cumulative_cost, **attrib(),
-                           note=f"cumulative ${cumulative_cost:.5f} exceeds cap ${max_spend_usd:.5f}")
-                break
+        if cumulative_cost > max_spend_usd:
+            stop_reason = "spend_cap"
+            logger.log("stop_spend_cap", cumulative_cost_usd=cumulative_cost, **attrib(),
+                       note=f"cumulative ${cumulative_cost:.5f} exceeds cap ${max_spend_usd:.5f}")
+            break
 
-            messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "assistant", "content": response.content})
 
-            if response.stop_reason != "tool_use":
-                # The model answered in plain text instead of calling draft_reply.
-                final_text = "\n".join(b.text for b in response.content if b.type == "text").strip()
-                stop_reason = "final_answer"
-                logger.log("no_draft_final_text", result=None, cumulative_cost_usd=cumulative_cost, **attrib(),
-                           note="model ended its turn with plain text, no draft_reply call")
-                break
+        if response.stop_reason != "tool_use":
+            # The model answered in plain text instead of calling draft_reply.
+            final_text = "\n".join(b.text for b in response.content if b.type == "text").strip()
+            stop_reason = "final_answer"
+            logger.log("no_draft_final_text", result=None, cumulative_cost_usd=cumulative_cost, **attrib(),
+                       note="model ended its turn with plain text, no draft_reply call")
+            break
 
-            tool_results = []
-            duplicate_hit = False
+        tool_results = []
+        duplicate_hit = False
 
-            for block in response.content:
-                if block.type != "tool_use":
-                    continue
-                name, args, call_id = block.name, block.input, block.id
-                key = _call_key(name, args)
+        for block in response.content:
+            if block.type != "tool_use":
+                continue
+            name, args, call_id = block.name, block.input, block.id
+            key = _call_key(name, args)
 
-                if key in seen_calls:
-                    logger.log("duplicate_call_blocked", tool=name, arguments=args,
-                               cumulative_cost_usd=cumulative_cost, **attrib(),
-                               note="Identical tool call seen before; stopping loop to avoid an infinite cycle.")
+            if key in seen_calls:
+                # FM-1 fix: an identical repeat is not a reason to abandon the run. Do NOT execute it
+                # again; hand the model the earlier result and let it carry on to draft_reply.
+                # Only a model that keeps repeating (> max_suppressed) is treated as stuck.
+                suppressed += 1
+                earlier = call_cache.get(key, {"error": "earlier identical call produced no result"})
+                logger.log("duplicate_call_suppressed", tool=name, arguments=args, result=earlier,
+                           cumulative_cost_usd=cumulative_cost, **attrib(),
+                           note=f"identical call already made; cached result returned, not re-executed ({suppressed}/{max_suppressed})")
+                tool_results.append(_tool_result(call_id, {
+                    "duplicate_call": True,
+                    "note": "You already made this exact call. Result unchanged - do not repeat it; use it and continue to draft_reply.",
+                    "earlier_result": earlier,
+                }))
+                if suppressed > max_suppressed:
                     duplicate_hit = True
                     break
-                seen_calls.add(key)
+                continue
+            seen_calls.add(key)
 
-                # --- guardrail: pre-call ---
+            # --- guardrail: pre-call ---
+            try:
+                check_pre_call(name, args)
+            except GuardrailViolation as gv:
+                logger.log("guardrail_blocked", tool=name, arguments=args,
+                           result={"error": gv.detail, "rule": gv.rule},
+                           cumulative_cost_usd=cumulative_cost, **attrib(), note="blocked before execution")
+                call_cache[key] = {"error": f"blocked by guardrail: {gv.detail}"}
+                tool_results.append(_tool_result(call_id, call_cache[key], True))
+                continue
+
+            # --- execute tool ---
+            with Timer() as tt:
                 try:
-                    check_pre_call(name, args)
+                    result = TOOL_FUNCTIONS[name](**args)
+                    error = None
+                except Exception as e:  # tool-level failure (bad arguments etc.)
+                    result = {"error": f"tool_failed: {e}"}
+                    error = str(e)
+
+            # --- guardrail: post-call ---
+            if error is None:
+                try:
+                    check_post_call(name, args, result)
                 except GuardrailViolation as gv:
                     logger.log("guardrail_blocked", tool=name, arguments=args,
                                result={"error": gv.detail, "rule": gv.rule},
-                               cumulative_cost_usd=cumulative_cost, **attrib(), note="blocked before execution")
-                    tool_results.append(_tool_result(call_id, {"error": f"blocked by guardrail: {gv.detail}"}, True))
+                               cumulative_cost_usd=cumulative_cost,
+                               **{**attrib(), "duration_ms": tt.elapsed_ms},
+                               note="blocked after execution, result discarded")
+                    call_cache[key] = {"error": f"blocked by guardrail: {gv.detail}"}
+                    tool_results.append(_tool_result(call_id, call_cache[key], True))
                     continue
 
-                # --- execute tool ---
-                with Timer() as tt:
-                    try:
-                        result = TOOL_FUNCTIONS[name](**args)
-                        error = None
-                    except Exception as e:  # tool-level failure (bad arguments etc.)
-                        result = {"error": f"tool_failed: {e}"}
-                        error = str(e)
+            call_cache[key] = result
+            a = attrib()
+            a["duration_ms"] += tt.elapsed_ms
+            logger.log("tool_call", tool=name, arguments=args, result=result,
+                       cumulative_cost_usd=cumulative_cost, **a)
+            tool_results.append(_tool_result(call_id, result, error is not None))
 
-                # --- guardrail: post-call ---
-                if error is None:
-                    try:
-                        check_post_call(name, args, result)
-                    except GuardrailViolation as gv:
-                        logger.log("guardrail_blocked", tool=name, arguments=args,
-                                   result={"error": gv.detail, "rule": gv.rule},
-                                   cumulative_cost_usd=cumulative_cost,
-                                   **{**attrib(), "duration_ms": tt.elapsed_ms},
-                                   note="blocked after execution, result discarded")
-                        tool_results.append(_tool_result(call_id, {"error": f"blocked by guardrail: {gv.detail}"}, True))
-                        continue
-
-                a = attrib()
-                a["duration_ms"] += tt.elapsed_ms
-                logger.log("tool_call", tool=name, arguments=args, result=result,
-                           cumulative_cost_usd=cumulative_cost, **a)
-                tool_results.append(_tool_result(call_id, result, error is not None))
-
-                if name == "draft_reply" and error is None:
-                    draft = result
-                    break
-
-            if draft is not None:
-                stop_reason = "draft_reply"
-                final_text = draft["message"]
-                break
-            if duplicate_hit:
-                stop_reason = "duplicate_call"
+            if name == "draft_reply" and error is None:
+                draft = result
                 break
 
-            messages.append({"role": "user", "content": tool_results})
-        else:
-            stop_reason = "step_cap"
-            logger.log("stop_step_cap", cumulative_cost_usd=cumulative_cost, note=f"reached max_steps={max_steps}")
-    finally:
-        pass
+        if draft is not None:
+            stop_reason = "draft_reply"
+            final_text = draft["message"]
+            break
+        if duplicate_hit:
+            stop_reason = "duplicate_limit"
+            logger.log("stop_duplicate_limit", cumulative_cost_usd=cumulative_cost,
+                       note=f"{suppressed} identical repeats suppressed (limit {max_suppressed}); model looks stuck")
+            break
+
+        messages.append({"role": "user", "content": tool_results})
+    else:
+        stop_reason = "step_cap"
+        logger.log("stop_step_cap", cumulative_cost_usd=cumulative_cost, note=f"reached max_steps={max_steps}")
 
     if final_text is None:
         final_text = (

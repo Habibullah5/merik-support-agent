@@ -43,7 +43,7 @@ No API key? The loop, checker and failure modes can all be exercised offline wit
 ```bash
 python run_scenarios.py --label reference_golden --scripted        # ideal path for all 20 (harness self-test)
 python run_scenarios.py --label after --failures --scripted        # the F1..F4 failure-mode reproductions
-pytest -q                                                          # 70+ tests, offline and free
+pytest -q                                                          # 78 passed + 3 strict xfails (the open gaps), offline and free
 ```
 
 > Scripted traces carry `model="scripted"` in their header and are **not** model behaviour. They test the
@@ -77,6 +77,17 @@ record is `run_end` (`stop_reason`, `final_text`).
 Path and reply are judged separately. Verdicts: `PASS`, `PATH FAIL` (right reply, wrong path - flagged),
 `REPLY FAIL`, `PATH+REPLY FAIL`. Expectations per scenario are in `data/expectations.json`. The checker is
 mechanical; it is the first pass of the review, not a replacement for reading the trace.
+
+## Status: failure modes (details and traces in TRACE_REVIEW.md)
+
+| ID | Failure mode | Reproduction | Status |
+|---|---|---|---|
+| FM-1 | Repeated identical call aborts the whole run | `F1` (scenario 18) | **fixed** - `git diff baseline fixed -- agent/loop.py` |
+| FM-2 | Run can end with no `draft_reply` | `F2` | open (strict-xfail test) |
+| FM-3 | Guardrail misses paraphrased / £ promises | `F3` (scenario 13) | open (strict-xfail test) |
+| FM-4 | Another customer's order record reaches the model | `F4` (scenario 12) | open (strict-xfail test) |
+
+Git tags: `baseline` (before the fix) and `fixed` (after). `traces/before/` and `traces/after/` were produced by those two commits.
 
 ## Layout
 

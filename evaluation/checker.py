@@ -18,7 +18,7 @@ import json
 import re
 from collections import Counter
 
-STOP_EVENTS = {"stop_spend_cap", "stop_step_cap", "duplicate_call_blocked", "no_draft_final_text"}
+STOP_EVENTS = {"stop_spend_cap", "stop_step_cap", "stop_duplicate_limit", "duplicate_call_blocked", "no_draft_final_text"}
 
 # Stronger than agent/guardrails.py on purpose: it is the yardstick, not a guardrail.
 _NEG = re.compile(r"\b(not|n't|cannot|can't|won't|unable|never|no)\b", re.I)

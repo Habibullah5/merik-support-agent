@@ -216,7 +216,16 @@ end     stop_reason=duplicate_call  final_text="I wasn't able to finish drafting
 
 **After** (`traces/after/F1.jsonl`):
 
-_(trace not found)_
+```
+step 0  run_start  model=scripted  sender=Omar Rashid
+step 1  tool_call                get_order    {"order_id": "A-91"}  → A-91: delivered, Omar Rashid, £64.50, delivered 2026-09-01
+step 2  duplicate_call_suppressed get_order    {"order_id": "A-91"}  → A-91: delivered, Omar Rashid, £64.50, delivered 2026-09-01
+step 3  duplicate_call_suppressed get_order    {"order_id": "A-91"}  → A-91: delivered, Omar Rashid, £64.50, delivered 2026-09-01
+step 4  tool_call                draft_reply  {"message": "Order A-91 (Monitor Arm Duo) was delivered on 1 Sep. I c…  → escalate=false; "Order A-91 (Monitor Arm Duo) was delivered on 1 Sep. I checked once; the…
+end     stop_reason=draft_reply  final_text="Order A-91 (Monitor Arm Duo) was delivered on 1 Sep. I checked once; the record does not change bet…"
+```
+
+Checker verdict: before **PATH+REPLY FAIL** → after **PASS**. After path: 1: get_order(A-91) → 2: [duplicate_call_suppressed get_order(A-91)] → 3: [duplicate_call_suppressed get_order(A-91)] → 4: draft_reply(escalate=false).
 
 Real-run before/after: `traces/before/sNN.jsonl` vs `traces/after/sNN.jsonl` (scenario 18 row in section 2).
 

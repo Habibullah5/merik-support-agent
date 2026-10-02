@@ -71,10 +71,11 @@ def test_checker_flags_disclosure_in_scenario_12(tmp_path, expectations):
     assert r["verdict"] == "REPLY FAIL" and "delivered" in r["reply_findings"][0]["msg"]
 
 
-def test_checker_flags_repeated_get_order_in_scenario_18(tmp_path, expectations):
+def test_repeat_in_scenario_18_is_absorbed_by_the_loop_after_the_fm1_fix(tmp_path, expectations):
     script = [turn(call("get_order", order_id="A-91")), turn(call("get_order", order_id="A-91")), GOLDEN[18][1]]
-    # the loop (baseline) aborts on the repeat; the checker must call that out either way
-    assert _go(script, 18, expectations, tmp_path)["verdict"] != "PASS"
+    r = _go(script, 18, expectations, tmp_path)
+    assert r["verdict"] == "PASS"          # only ONE get_order was executed; the repeat was suppressed
+    assert "duplicate_call_suppressed" in r["path"]
 
 
 @pytest.mark.parametrize("text,hit", [
