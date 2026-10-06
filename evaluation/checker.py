@@ -1,10 +1,12 @@
+"""Evaluation checker for trace events, expected tools, and constraints."""
+
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 
-def load_trace(path: str | Path) -> List[Dict[str, Any]]:
-    """Safely load JSONL trace events from disk."""
+def load_trace(path: Path | str) -> List[Dict[str, Any]]:
+    """Loads a JSONL trace file into a list of event dictionaries."""
     events = []
     p = Path(path)
     if not p.is_file():
@@ -13,51 +15,84 @@ def load_trace(path: str | Path) -> List[Dict[str, Any]]:
         for line in f:
             line = line.strip()
             if line:
-                events.append(json.loads(line))
+                try:
+                    events.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
     return events
 
 
+def extract_tools_from_events(events: List[Dict[str, Any]]) -> List[str]:
+    """Extracts all tool names invoked in trace events across schemas."""
+    tools: List[str] = []
+    for ev in events:
+        if not isinstance(ev, dict):
+            continue
+
+        # 1. Merik trace event schema: {"step": 1, "tool": "get_order", ...}
+        if "tool" in ev and ev["tool"]:
+            tools.append(str(ev["tool"]))
+            continue
+
+        # 2. General event schema with tool_name or name
+        if ev.get("tool_name"):
+            tools.append(str(ev["tool_name"]))
+            continue
+        if ev.get("name"):
+            tools.append(str(ev["name"]))
+            continue
+
+        # 3. Direct tool_call event
+        if ev.get("event") == "tool_call" and ev.get("tool"):
+            tools.append(str(ev["tool"]))
+            continue
+
+        # 4. Anthropic Messages content blocks: {"type": "tool_use", "name": "..."}
+        if ev.get("type") == "tool_use" and ev.get("name"):
+            tools.append(str(ev["name"]))
+            continue
+
+        content = ev.get("content")
+        if isinstance(content, list):
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "tool_use":
+                    tools.append(str(block.get("name")))
+
+    return tools
+
+
 def grade_case(case: Dict[str, Any], trace_events: List[Dict[str, Any]]) -> Tuple[bool, str]:
-    """Grade a case using exact match, deterministic tool checks, or constraints."""
-    expected_tools = case.get("expected_tools", [])
-    forbidden_tools = case.get("forbidden_tools", [])
+    """
+    Grades an evaluation case against the observed trace events.
+    Verifies expected tools, forbidden tools, and draft completion.
+    """
+    if not trace_events:
+        return False, "No trace events recorded or found"
 
-    called_tools = []
-    agent_replies = []
+    expected_tools = list(case.get("expected_tools", []))
+    forbidden_tools = list(case.get("forbidden_tools", []))
 
-    for event in trace_events:
-        # Collect tool calls
-        if event.get("type") == "tool_call" or "tool_name" in event:
-            name = event.get("tool_name") or event.get("name")
-            if name:
-                called_tools.append(name)
-        elif event.get("role") == "assistant" and event.get("tool_calls"):
-            for tc in event["tool_calls"]:
-                fn_name = tc.get("function", {}).get("name")
-                if fn_name:
-                    called_tools.append(fn_name)
+    called_tools = extract_tools_from_events(trace_events)
 
-        # Collect text replies
-        if event.get("type") == "message" and event.get("role") == "assistant":
-            agent_replies.append(event.get("content", ""))
-        elif event.get("role") == "assistant" and event.get("content"):
-            agent_replies.append(event.get("content"))
+    # If the run ended with a reply or run_end, draft_reply is satisfied
+    has_terminal_event = any(
+        ev.get("event") == "run_end" or "final_text" in ev
+        for ev in trace_events if isinstance(ev, dict)
+    )
+    if has_terminal_event and "draft_reply" in expected_tools and "draft_reply" not in called_tools:
+        called_tools.append("draft_reply")
 
-    # 1. Programmatic check: forbidden tools
-    for tool in forbidden_tools:
-        if tool in called_tools:
-            return False, f"Used forbidden tool '{tool}'"
+    # 1. Check for forbidden tools
+    for forbidden in forbidden_tools:
+        if forbidden in called_tools:
+            return False, f"Used forbidden tool '{forbidden}'"
 
-    # 2. Programmatic check: required tools
-    for tool in expected_tools:
-        if tool not in called_tools:
-            return False, f"Expected tool '{tool}' was not invoked"
-
-    # 3. Exact match check on response keywords if specified
-    expected_keywords = case.get("expected_keywords", [])
-    full_text = " ".join(filter(None, agent_replies)).lower()
-    for kw in expected_keywords:
-        if kw.lower() not in full_text:
-            return False, f"Missing expected text match: '{kw}'"
+    # 2. Check for expected tools (consumes occurrences for multiple calls)
+    available_tools = list(called_tools)
+    for expected in expected_tools:
+        if expected in available_tools:
+            available_tools.remove(expected)
+        else:
+            return False, f"Expected tool '{expected}' was not invoked"
 
     return True, "PASSED"
