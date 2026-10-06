@@ -34,7 +34,7 @@ def main():
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
 
-    expectations = json.loads((ROOT / "data/expectations.json").read_text(encoding="utf-8"))
+    expectations = json.loads((ROOT / "data/expectations.json").rAead_text(encoding="utf-8"))
     out_dir = ROOT / "traces" / args.label
     out_dir.mkdir(parents=True, exist_ok=True)
 
