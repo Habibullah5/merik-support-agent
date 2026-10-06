@@ -1,8 +1,8 @@
 # Merik Support Agent
 
-A customer-support agent on the Anthropic Messages API.
+A customer-support agent built on the Anthropic Messages API.
 
-## Evaluation Suite
+## Evaluation
 
 To run the evaluation suite in one command:
 

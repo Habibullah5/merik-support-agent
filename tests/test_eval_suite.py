@@ -22,9 +22,10 @@ EVAL_CASES = get_eval_cases()
 @pytest.mark.parametrize("case", EVAL_CASES, ids=lambda c: c.get("id", "case"))
 def test_evaluation_case(case):
     case_id = case.get("id")
-    has_api_key = bool(os.getenv("ANTHROPIC_API_KEY") or os.getenv("OPENAI_API_KEY"))
+    # Only make live API calls if explicitly flagged via RUN_LIVE environment variable
+    run_live = os.getenv("RUN_LIVE") == "1"
 
-    if has_api_key:
+    if run_live:
         from agent.loop import run_agent
         result = run_agent(
             message=case.get("message", case.get("query", "")),

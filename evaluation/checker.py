@@ -1,8 +1,9 @@
 """Evaluation checker for trace events, expected tools, and constraints."""
 
 import json
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def load_trace(path: Path | str) -> List[Dict[str, Any]]:
@@ -29,12 +30,10 @@ def extract_tools_from_events(events: List[Dict[str, Any]]) -> List[str]:
         if not isinstance(ev, dict):
             continue
 
-        # 1. Merik trace event schema: {"step": 1, "tool": "get_order", ...}
         if "tool" in ev and ev["tool"]:
             tools.append(str(ev["tool"]))
             continue
 
-        # 2. General event schema with tool_name or name
         if ev.get("tool_name"):
             tools.append(str(ev["tool_name"]))
             continue
@@ -42,12 +41,10 @@ def extract_tools_from_events(events: List[Dict[str, Any]]) -> List[str]:
             tools.append(str(ev["name"]))
             continue
 
-        # 3. Direct tool_call event
         if ev.get("event") == "tool_call" and ev.get("tool"):
             tools.append(str(ev["tool"]))
             continue
 
-        # 4. Anthropic Messages content blocks: {"type": "tool_use", "name": "..."}
         if ev.get("type") == "tool_use" and ev.get("name"):
             tools.append(str(ev["name"]))
             continue
@@ -61,11 +58,86 @@ def extract_tools_from_events(events: List[Dict[str, Any]]) -> List[str]:
     return tools
 
 
+def find_action_claims(text: str) -> List[str]:
+    """Detects unauthorized commitment strings (refunds, cancellations, credits)."""
+    patterns = [
+        r"i('ve| have) refunded",
+        r"refund(ed)? (the |your )?£?\d+",
+        r"money is on the way",
+        r"cancelled (your|the) order",
+        r"i have cancelled",
+        r"we('ll| will) refund",
+    ]
+    matches = []
+    lower_text = text.lower()
+    for pat in patterns:
+        if re.search(pat, lower_text):
+            matches.append(pat)
+    return matches
+
+
+class AnalysisResult(dict):
+    """Container supporting both dictionary and attribute access for trace analysis."""
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError:
+            return None
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self[name] = value
+
+
+def analyse(trace: List[Dict[str, Any]]) -> AnalysisResult:
+    """Analyzes a trace for tool calls, duplicate calls, draft reply presence, and claims."""
+    tool_calls = []
+    call_signatures = []
+    repeated_calls = []
+    draft_reply = None
+    final_text = ""
+
+    for ev in trace:
+        if not isinstance(ev, dict):
+            continue
+
+        tool_name = ev.get("tool") or ev.get("name") or ev.get("tool_name")
+        args = ev.get("arguments") or ev.get("args") or ev.get("input") or {}
+
+        if tool_name:
+            tool_calls.append({"tool": tool_name, "args": args})
+            sig = (tool_name, json.dumps(args, sort_keys=True))
+            if sig in call_signatures:
+                repeated_calls.append(tool_name)
+            else:
+                call_signatures.append(sig)
+
+            if tool_name == "draft_reply":
+                draft_reply = args
+
+        if ev.get("event") == "run_end":
+            final_text = ev.get("final_text", "")
+        elif ev.get("role") == "assistant" and ev.get("content"):
+            final_text = str(ev["content"])
+
+    if draft_reply and isinstance(draft_reply, dict):
+        final_text = draft_reply.get("message", final_text)
+
+    action_claims = find_action_claims(final_text)
+
+    return AnalysisResult({
+        "tool_calls": tool_calls,
+        "repeated_calls": repeated_calls,
+        "has_repeated_calls": len(repeated_calls) > 0,
+        "draft_reply": draft_reply,
+        "has_draft_reply": draft_reply is not None,
+        "final_text": final_text,
+        "action_claims": action_claims,
+        "has_action_claims": len(action_claims) > 0,
+    })
+
+
 def grade_case(case: Dict[str, Any], trace_events: List[Dict[str, Any]]) -> Tuple[bool, str]:
-    """
-    Grades an evaluation case against the observed trace events.
-    Verifies expected tools, forbidden tools, and draft completion.
-    """
+    """Grades an evaluation case against observed trace events."""
     if not trace_events:
         return False, "No trace events recorded or found"
 
@@ -74,7 +146,6 @@ def grade_case(case: Dict[str, Any], trace_events: List[Dict[str, Any]]) -> Tupl
 
     called_tools = extract_tools_from_events(trace_events)
 
-    # If the run ended with a reply or run_end, draft_reply is satisfied
     has_terminal_event = any(
         ev.get("event") == "run_end" or "final_text" in ev
         for ev in trace_events if isinstance(ev, dict)
@@ -82,12 +153,10 @@ def grade_case(case: Dict[str, Any], trace_events: List[Dict[str, Any]]) -> Tupl
     if has_terminal_event and "draft_reply" in expected_tools and "draft_reply" not in called_tools:
         called_tools.append("draft_reply")
 
-    # 1. Check for forbidden tools
     for forbidden in forbidden_tools:
         if forbidden in called_tools:
             return False, f"Used forbidden tool '{forbidden}'"
 
-    # 2. Check for expected tools (consumes occurrences for multiple calls)
     available_tools = list(called_tools)
     for expected in expected_tools:
         if expected in available_tools:
